@@ -1,19 +1,46 @@
-@(createForm: Form[femr.ui.models.sessions.CreateViewModel])
 
+@(createForm: Form[femr.ui.models.sessions.CreateViewModel],eMessage: String)
+@import helper._
 @import femr.ui.views.html.layouts.main
 @import femr.ui.controllers.routes.SessionsController
-    @styles = {
-        <link rel="stylesheet" href="@routes.Assets.versioned("css/login.css")">
-    }
+@styles ={
+    <link rel="stylesheet" href="@routes.Assets.versioned("css/login.css")">
+}
 @main("Login", styles = styles) {
 
-    @helper.form(action = SessionsController.createPost(), 'class -> "form-signin") {
-        <div id="login">
-            <h1>Please sign in</h1>
-            <input type="text" name="email" placeholder="Email" />
+    @helper.form(action = SessionsController.createPost(),'class -> "form-signin") {
+
+
+        <p id="login">
+    <h1>Please sign in</h1>
+        @if(flash.containsKey("error")) {
+            <div id="error-message" class="text-danger">
+                <h3>@flash.get("error")</h3>
+            </div>
+
+        }
+        @if(flash.containsKey("error1")) {
+            <div id="error-message" class="text-danger">
+                <h3>@flash.get("error1")</h3>
+            </div>
+
+        }
+        <div>
+            <input type="text" name="email" placeholder="Email" value="@eMessage"/>
             <input type="password" name="password" placeholder="Password" />
-            <input type="submit" value="Log in" />
+            <input type="submit"  value="Log in"/>
             <img src="@routes.Assets.versioned("img/logo_color_sm.png")" />
         </div>
+
+
     }
+
 }
+
+
+
+improvement-FEMR-295-show-errors-on-login-page
+
+
+
+Wanted to see if database was actually used and with db.default.driver and db.default.url uncommented,we knew a datatbase was used

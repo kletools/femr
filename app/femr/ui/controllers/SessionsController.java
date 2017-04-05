@@ -1,11 +1,13 @@
 package femr.ui.controllers;
 
+import com.avaje.ebean.Ebean;
 import com.google.inject.Inject;
 import femr.business.services.core.ISessionService;
 import femr.business.services.core.IUserService;
 import femr.common.dtos.CurrentUser;
 import femr.common.dtos.ServiceResponse;
 import femr.data.models.core.IUser;
+import femr.data.models.mysql.User;
 import femr.ui.models.sessions.CreateViewModel;
 import femr.ui.views.html.sessions.create;
 import femr.ui.views.html.sessions.editPassword;
@@ -44,7 +46,7 @@ public class SessionsController extends Controller {
             return redirect(routes.HomeController.index());
         }
 
-        return ok(create.render(createViewModelForm));
+        return ok(create.render(createViewModelForm,""));
     }
 
     public Result createPost() {
@@ -54,7 +56,20 @@ public class SessionsController extends Controller {
         ServiceResponse<CurrentUser> response = sessionsService.createSession(viewModel.getEmail(), viewModel.getPassword(), request().remoteAddress());
 
         if (response.hasErrors()) {
-            return ok(create.render(createViewModelForm));
+            if(viewModel.getEmail().isEmpty()&& viewModel.getPassword().isEmpty()){
+                flash("error1","Email and Password are required");
+                return badRequest(create.render(createViewModelForm,viewModel.getEmail()));
+            }
+
+            User userVerificationEmail= Ebean.find(User.class).where().eq("email",viewModel.getEmail()).findUnique();
+            User userVerificationPassword= Ebean.find(User.class).where().eq("password",viewModel.getPassword()).findUnique();
+            if(userVerificationEmail== null ||userVerificationPassword==null )
+            {
+                flash("error", "Invalid username and/or wrong password");
+                return badRequest(create.render(createViewModelForm,viewModel.getEmail()));
+            }
+
+            return ok(create.render(createViewModelForm,""));
         }else{
             IUser user = userService.retrieveById(response.getResponseObject().getId());
             user.setLastLogin(dateUtils.getCurrentDateTime());
